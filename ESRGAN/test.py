@@ -1,7 +1,6 @@
 import os.path as osp
 import glob
 import cv2
-import numpy as np
 import torch
 import RRDBNet_arch as arch
 
@@ -25,13 +24,13 @@ for path in glob.glob(test_img_folder):
     # read images
     img = cv2.imread(path, cv2.IMREAD_COLOR)
     img = img * 1.0 / 255
-    img = torch.from_numpy(np.transpose(img[:, :, [2, 1, 0]], (2, 0, 1))).float()
+    img = img.permute(2, 0, 1)
     img_LR = img.unsqueeze(0)
     img_LR = img_LR.to(device)
 
     with torch.no_grad():
         output = model(img_LR).data.squeeze().float().cpu().clamp_(0, 1).numpy()
-    output = np.transpose(output[[2, 1, 0], :, :], (1, 2, 0))
+    output = output.permute(1, 2, 0) 
     output = (output * 255.0).round()
 
     output_path = f'ESRGAN/results/{base}_rlt{ext}'
